@@ -1,29 +1,6 @@
 include <base_module.scad>
 include <c_holder.scad>
-
-module grid (
-    thickness_diff_middle,
-    height_bottom,
-    grip_size,
-    grip_margin_top,
-    grip_margin_bottom,
-    grip_margin_sides,
-    grip_spacing,
-    grip_depth,
-    grid_sides,
-) {
-    
-    for (a =[3:0.5:5]) {
-        echo(a);   
-    }
-    
-    deg_grip = atan((thickness_diff_middle) / height_bottom);
-    translate([-5, -5, 0])
-    rotate([-deg_grip, -deg_grip, deg_grip])
-    cylinder(h = grip_depth, d1 = 0,  r2 = grip_size, $fn = grid_sides);
-}
-
-
+include <grid.scad>
 
 module clip (
     base_round = 0.4,
@@ -32,20 +9,20 @@ module clip (
 	height = 72,
     height_top = 13,
     height_middle = 15,
-	width_top = 32,
+	width_top = 29,
     width_middle = 32,
     width_bottom = 25,
 	thickness_top = 5,
-    thickness_middle = 6,
+    thickness_middle = 5,
 	thickness_bottom = 4,
-    grip_size = 2,
-    grip_margin_top = 1,
-    grip_margin_bottom = 1,
-    grip_margin_sides = 1,
-    grip_spacing = 1,
-    grip_depth = 2,
-    grid_sides = 8,
-    mfn = 17, 
+    grid_size = 0.5,
+    grid_line_size = 4,
+    grid_line_count = 4,
+    grid_margin_top = 5,
+    grid_margin_bottom = 4,
+    grid_margin_sides = 2,
+    grid_depth = 2,
+    mfn = 10, 
     c_holder_diameter_inside = 3,
     c_holder_outside = 1.5,
     c_holder_width = 5, 
@@ -96,7 +73,7 @@ module clip (
                 base_module(
                     base_round, bottom_round, top_round, height, height_top, height_middle,
                     width_top, width_middle, width_bottom, thickness_top, thickness_middle, 
-                    thickness_bottom, mnf
+                    thickness_bottom, mfn
                 );
                 
                 translate(
@@ -161,28 +138,12 @@ module clip (
                 c_holder_width, c_holder_height + base_round,
                 c_holder_lenght, c_holder_immersed
             );
-            
-           
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            %grid(
-                thickness_middle-thickness_min, height_bottom, grip_size, 
-                grip_margin_top, grip_margin_bottom, grip_margin_sides,
-                grip_spacing, grip_depth, grid_sides
-            );
         };
+        // double sphere hole in back base module 
         hull () {
             translate(
                 [
-                    height - height_top/2, 
+                    height - height_top/2 - height_middle/4, 
                     width_middle/2 - top_immersed_width/2, 
                     -top_immersed_sphere_radius+top_immersed
                 ]
@@ -191,14 +152,39 @@ module clip (
             
             translate(
                 [
-                    height - height_top/2, 
+                    height - height_top/2 - height_middle/4, 
                     width_middle/2 + top_immersed_width/2, 
                     -top_immersed_sphere_radius+top_immersed
                 ]
             )
             sphere(r = top_immersed_sphere_radius);
         }
-    }
+        // do grid to bottom
+        grid(
+            thickness_middle, thickness_bottom, height_bottom, width_middle, 
+            width_bottom, grid_size, grid_margin_top, 
+            grid_margin_bottom, grid_depth, mfn
+        );
+        
+        // do grid lines
+        spacing = ((width_bottom - 2 * grid_margin_sides - 1 * grid_line_size) - ((grid_line_count - 1) * grid_line_size))/(grid_line_count - 1);
+        
+        
+        for (i = [0:1:grid_line_count - 1]) { 
+            translate(
+                [
+                    0, 
+                    (width_middle - width_bottom)/2 + grid_margin_sides + i * (grid_line_size + spacing), 
+                    0
+                ]
+            )
+            vertical_grid_line(
+                thickness_middle, thickness_bottom, height_bottom, width_middle, 
+                width_bottom, grid_line_size, grid_size, grid_margin_top, 
+                grid_margin_bottom, grid_depth
+            );
+        };
+    };
 }
 
 clip();
