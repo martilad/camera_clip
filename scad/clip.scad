@@ -6,7 +6,9 @@
  */
  
 module base_module (
-    base_round=10,
+    base_round,
+    bottom_round,
+    top_round,
 	height,
     height_top,
     height_middle,
@@ -15,7 +17,8 @@ module base_module (
     width_bottom,
     thickness_top, 
     thickness_middle, 
-    thickness_bottom
+    thickness_bottom, 
+    mnf
 ) { 
     // difference for rounding
     base_round_difference = 2 * base_round;
@@ -23,32 +26,75 @@ module base_module (
     width_top = width_top - base_round_difference;
     width_middle = width_middle - base_round_difference;
     width_bottom = width_bottom - base_round_difference;
+    bottom_round = bottom_round - base_round_difference;
+    top_round = top_round - base_round_difference;
     height_bottom = height - height_top - height_middle;
     
+    echo(bottom_round);
+    echo(base_round_difference);
     thickness_top = thickness_top - base_round_difference;
     thickness_middle = thickness_middle - base_round_difference;
     thickness_bottom = thickness_bottom - base_round_difference;
     
     translate([base_round, base_round, base_round]) // move to xyz start
-        minkowski() {
+        minkowski(){
             hull(){
-                //base minimum
-                //cube([height,width,thickness_top]);
                
-                // top box
-                translate([height, (width_middle - width_top) / 2, 0])
-                cube([0.001, width_top, thickness_top]);
+                // top part with round for hull
+                
+                // right base cylinder
+                translate([height - top_round/2, (width_middle - width_top)/2 + top_round/2, 0])
+                cylinder(
+                    h = thickness_top, 
+                    r1 = top_round/2,  
+                    r2 = top_round/2, 
+                    $fn = mnf
+                );
+   
+                // left base cylinder
+                translate([height - top_round/2, (width_middle - width_top)/2 - top_round/2 + width_top, 0])
+                cylinder(
+                    h = thickness_top, 
+                    r1 = top_round/2,  
+                    r2 = top_round/2, 
+                    $fn = mnf
+                );
                 
                 //middle box
                 translate([height_bottom, 0, 0])
                     cube([height_middle, width_middle, thickness_middle]);
                 
-                // bottom box
-                translate([0, (width_middle - width_bottom) / 2, 0])
-                cube([0.001, width_bottom, thickness_bottom]);
+                
+                // bottom part with round for hull
+                
+                // right base cylinder
+                translate(
+                    [bottom_round/2, 
+                    (width_middle - width_bottom)/2 + bottom_round/2, 
+                    0]
+                )
+                cylinder(
+                    h = thickness_bottom, 
+                    r1 = bottom_round/2,  
+                    r2 = bottom_round/2, 
+                    $fn = mnf
+                );
+               
+                // left base cylinder
+                translate(
+                    [bottom_round/2, 
+                    (width_middle - width_bottom)/2 - bottom_round/2 + width_bottom,
+                    0]
+                )
+                cylinder(
+                    h = thickness_bottom, 
+                    r1 = bottom_round/2,  
+                    r2 = bottom_round/2, 
+                    $fn = mnf
+                );
             };
             sphere(r = base_round);
-    }
+       };
 }
 
 module grid (
@@ -122,10 +168,12 @@ module c_holder (
 
 module clip (
     base_round = 0.4,
+    bottom_round=10,
+    top_round=5,
 	height = 72,
     height_top = 13,
     height_middle = 15,
-	width_top = 39,
+	width_top = 32,
     width_middle = 35,
     width_bottom = 25,
 	thickness_top = 5,
@@ -178,9 +226,9 @@ module clip (
     union () {
         difference () {
             base_module(
-                base_round, height, height_top, height_middle,
+                base_round, bottom_round, top_round, height, height_top, height_middle,
                 width_top, width_middle, width_bottom, thickness_top, thickness_middle, 
-                thickness_bottom
+                thickness_bottom, mnf
             );
             
             translate(
