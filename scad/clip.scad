@@ -22,7 +22,7 @@ module clip (
     grid_margin_bottom = 2.7,
     grid_margin_sides = 3,
     grid_depth = 1.5,
-    mfn = 15, 
+    mfn = 10, 
     c_holder_diameter_inside = 3,
     c_holder_outside = 1.8,
     c_holder_width = 3.6, 
@@ -32,7 +32,7 @@ module clip (
     c_holder_immersed = 1.9, 
     c_holder_borders = 0,
     c_holder_diameter = 10, 
-    top_immersed = 1.5,
+    top_immersed = 0,
     top_immersed_sphere_radius = 15,
     top_immersed_width = 12
 ) {
